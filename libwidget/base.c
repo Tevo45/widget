@@ -45,10 +45,14 @@ widgetmain(Widgetctl* ctl)
 		switch(alt(chans))
 		{
 		case MOUSE:
-			mouseevent(ctl->root, ctl->image, ctl->image->r, mouse, ctl->c);
+			if(!mouseevent(ctl->root, ctl->image, ctl->image->r, mouse, ctl->c) 
+				&& ctl->flags & FORWARD_MOUSE)
+				send(ctl->mousec, &mouse);
 			break;
 		case KEYBOARD:
-			kbdevent(ctl->root, ctl->image, ctl->image->r, rune, ctl->c);
+			if(!kbdevent(ctl->root, ctl->image, ctl->image->r, rune, ctl->c)
+				&& ctl->flags & FORWARD_KBD)
+				send(ctl->kbdc, &rune);
 			break;
 		}
 		flushimage(ctl->image->display, 1);
@@ -56,19 +60,41 @@ widgetmain(Widgetctl* ctl)
 }
 
 Widgetctl*
-initwidget(Image *img, Keyboardctl *kbd, Mousectl *mouse, Widget *root)
+initwidget(Image *img, Keyboardctl *kbd, Mousectl *mouse, Widget *root, int flags)
 {
 	Widgetctl *ctl;
 
-	if((ctl = malloc(sizeof(*ctl))) == nil)
+	if((ctl = mallocz(sizeof(*ctl), 1)) == nil)
 		return nil;
+
+	if(mouse == nil)
+		if((mouse = initmouse(nil, img)) == nil)
+		{
+			free(ctl);
+			return nil;
+		}
+		else
+			ctl->pflags |= OURMOUSE;
+
+	if(kbd == nil)
+		if((kbd = initkeyboard(nil)) == nil)
+		{
+			free(ctl);
+			closemouse(mouse);
+			return nil;
+		}
+		else
+			ctl->pflags |= OURKBD;
 
 	ctl->image = img;
 	ctl->mouse = mouse;
 	ctl->root = root;
 	ctl->kbd = kbd;
 	ctl->c = chancreate(sizeof(Widgetmsg), 16);
+	ctl->kbdc = chancreate(sizeof(Rune), 20);
+	ctl->mousec = chancreate(sizeof(Mouse), 16);
 	ctl->resizec = mouse->resizec;
+	ctl->flags = flags;
 
 	threadcreate((void(*)(void*))widgetmain, ctl, 16384);
 
@@ -76,6 +102,20 @@ initwidget(Image *img, Keyboardctl *kbd, Mousectl *mouse, Widget *root)
 	flushimage(img->display, 1);
 
 	return ctl;
+}
+
+void
+closewidget(Widgetctl *ctl)
+{
+	if(ctl->pflags & OURKBD)
+		closekeyboard(ctl->kbd);
+
+	if(ctl->pflags & OURMOUSE)
+		closemouse(ctl->mouse);
+
+	/* TODO cleanup chans, close threads, etc */
+
+	free(ctl);
 }
 
 /* TODO set clipr */

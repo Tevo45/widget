@@ -9,3 +9,10 @@ emalloc(ulong sz)
 	setmalloctag(p, getcallerpc(&sz));
 	return p;
 }
+
+/* Widgetctl->flags */
+enum
+{
+	OURKBD		= 1<<0,
+	OURMOUSE	= 1<<1
+};

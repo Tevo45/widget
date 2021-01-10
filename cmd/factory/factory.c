@@ -17,11 +17,10 @@ usage(void)
 void
 threadmain(int argc, char **argv)
 {
-	Keyboardctl *kbctl;
-	Mousectl *mctl;
-	Button *root;
 	Widgetctl *wctl;
 	Widgetmsg *msg;
+	Button *root;
+	Rune rune;
 
 	ARGBEGIN {
 	default:
@@ -31,26 +30,21 @@ threadmain(int argc, char **argv)
 	if(initdraw(nil, nil, "widget factory") < 0)
 		sysfatal("initdraw: %r");
 
-	if((mctl = initmouse(nil, screen)) == nil)
-		sysfatal("initmouse: %r");
-
-	if((kbctl = initkeyboard(nil)) == nil)
-		sysfatal("initkeyboard: %r");
-
 	root = newtextbutton(nil, "hello, world!");
 
-	if((wctl = initwidget(screen, kbctl, mctl, root)) == nil)
+	if((wctl = initwidget(screen, nil, nil, root, FORWARD_KBD)) == nil)
 		sysfatal("initwidget: %r");
 
 	enum
 	{
-		MESSAGE, RESIZE
+		MESSAGE, RESIZE, KEYBOARD
 	};
 
 	Alt chans[] = 
 	{
 		{ wctl->c,			&msg,	CHANRCV },
 		{ wctl->resizec,	nil,	CHANRCV },
+		{ wctl->kbdc,		&rune,	CHANRCV },
 
 		{ nil,				nil,	CHANEND }
 	};
@@ -63,6 +57,10 @@ threadmain(int argc, char **argv)
 			print("got message for %d!\n", msg->what);
 			free(msg);
 			break;
+		case KEYBOARD:
+			if(rune == '')
+				goto end;
+			break;
 		case RESIZE:
 			if(getwindow(display, Refnone) < 0)
 				sysfatal("getwindow: cannot resize: %r");
@@ -74,8 +72,7 @@ threadmain(int argc, char **argv)
 	}
 
 end:
-	closemouse(mctl);
-	closekeyboard(kbctl);
+	closewidget(wctl);
 	freewidget(root);
 
 	exits(0);
