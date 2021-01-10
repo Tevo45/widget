@@ -1,0 +1,14 @@
+BIN=/$objtype/bin/widget
+
+FOLDERS=\
+	factory
+
+all:V:
+
+%:V: $FOLDERS $BIN
+	for(f in $FOLDERS) @{
+		cd $f; mk $stem
+	}
+
+$BIN:
+	mkdir -p $target

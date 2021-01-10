@@ -1,0 +1,3 @@
+• figure out a way to reduce boilerplate for each widget
+• not sure if pulling every base widget dependency along the library is a great idea, maybe split the headers (<widget.h>, then <widget/textbox.h>, <widget/button.h>, etc)?
+• figure out widget-generated event handling

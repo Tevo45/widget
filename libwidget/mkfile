@@ -1,0 +1,23 @@
+</$objtype/mkfile
+
+LIB=/$objtype/lib/libwidget.a
+
+OFILES=\
+	base.$O		\
+	textbox.$O	\
+	button.$O
+
+HDR=widget.h
+
+HCOMP=\
+	base.h		\
+	textbox.h	\
+	button.h
+
+HFILES=\
+	/sys/include/$HDR
+
+</sys/src/cmd/mksyslib
+
+/sys/include/$HDR: $HCOMP
+	cat $prereq >$target

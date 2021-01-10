@@ -1,0 +1,11 @@
+</$objtype/mkfile
+
+TARG=factory
+
+OFILES=\
+	factory.$O
+
+HFILES=\
+	/sys/include/widget.h
+
+</sys/src/cmd/mkone

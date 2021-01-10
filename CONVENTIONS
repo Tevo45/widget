@@ -1,0 +1,7 @@
+• widgets that encapsulate other widgets:
+	- take ownership (responsible for freeing, etc)
+	- are responsible for ensuring their subwidgets don't stomp
+all over the screen
+• widgets should make sure global state is consistent with how it was when their functions were invoked (i.e. if you touch screen->clipr, restore it before returning, etc)
+• Widget->draw returns size of widget
+• event handling functions return 1 for when they handled the event themselves and 0 when they didn't
