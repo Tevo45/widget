@@ -19,7 +19,7 @@ nextid(void)
 }
 
 void
-widgetmain(Widgetctl* ctl)
+widgetmain(Widgetctl *ctl)
 {
 	Mouse mouse;
 	Rune rune;
@@ -36,6 +36,8 @@ widgetmain(Widgetctl* ctl)
 	{
 		MOUSE, KEYBOARD
 	};
+
+	threadsetname("widgetmain");
 
 	for(;;)
 	{
@@ -90,13 +92,13 @@ initwidget(Image *img, Keyboardctl *kbd, Mousectl *mouse, Widget *root, int flag
 	ctl->mouse = mouse;
 	ctl->root = root;
 	ctl->kbd = kbd;
-	ctl->c = chancreate(sizeof(Widgetmsg), 16);
+	ctl->c = chancreate(sizeof(Widgetmsg*), 16);
 	ctl->kbdc = chancreate(sizeof(Rune), 20);
 	ctl->mousec = chancreate(sizeof(Mouse), 16);
 	ctl->resizec = mouse->resizec;
 	ctl->flags = flags;
 
-	threadcreate((void(*)(void*))widgetmain, ctl, 16384);
+	ctl->wthread = threadcreate((void(*)(void*))widgetmain, ctl, 16384);
 
 	redrawwidget(root, img, img->r);
 	flushimage(img->display, 1);
@@ -107,15 +109,27 @@ initwidget(Image *img, Keyboardctl *kbd, Mousectl *mouse, Widget *root, int flag
 void
 closewidget(Widgetctl *ctl)
 {
+	chanclose(ctl->c);
+	chanclose(ctl->kbdc);
+	chanclose(ctl->mousec);
+	chanclose(ctl->resizec);
+
+	threadint(ctl->wthread);
+
 	if(ctl->pflags & OURKBD)
 		closekeyboard(ctl->kbd);
 
 	if(ctl->pflags & OURMOUSE)
 		closemouse(ctl->mouse);
 
-	/* TODO cleanup chans, close threads, etc */
-
 	free(ctl);
+}
+
+void
+redrawwctl(Widgetctl *ctl)
+{
+	redrawwidget(ctl->root, ctl->image, ctl->image->r);
+	flushimage(ctl->image->display, 1);
 }
 
 /* TODO set clipr */
@@ -159,7 +173,7 @@ wdefaults(Widget *w)
 }
 
 Widgetmsg*
-newmsg(Widget* w, u32int what)
+newmsg(Widget *w, u32int what)
 {
 	Widgetmsg *msg;
 

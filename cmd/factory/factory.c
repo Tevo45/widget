@@ -50,11 +50,18 @@ threadmain(int argc, char **argv)
 	};
 
 	for(;;)
-	{
 		switch(alt(chans))
 		{
 		case MESSAGE:
-			print("got message for %d!\n", msg->what);
+			switch(msg->what)
+			{
+			case M_BUTTON_PRESSED:
+				print("button %d was pressed!\n", msg->sender->id);
+				break;
+			case M_BUTTON_RELEASED:
+				print("button %d was released!\n", msg->sender->id);
+				break;
+			}
 			free(msg);
 			break;
 		case KEYBOARD:
@@ -64,12 +71,9 @@ threadmain(int argc, char **argv)
 		case RESIZE:
 			if(getwindow(display, Refnone) < 0)
 				sysfatal("getwindow: cannot resize: %r");
-			/* FIXME most users shouldn't need to call this directly */
-			redrawwidget(root, screen, screen->r);
+			redrawwctl(wctl);
 			break;
 		}
-		flushimage(display, 1);
-	}
 
 end:
 	closewidget(wctl);

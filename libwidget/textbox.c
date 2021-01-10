@@ -9,7 +9,7 @@
 #include <widget.h>
 #include "w-internal.h"
 
-static char* tbkind = "Textbox";
+static char *tbkind = "Textbox";
 
 int
 istextbox(Widget *w)

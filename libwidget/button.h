@@ -1,3 +1,4 @@
+/*** Button ***/
 
 typedef struct Button Button;
 
@@ -16,6 +17,7 @@ Button* newtextbutton(Font*, char *content);
 
 enum
 {
-	M_BUTTON_PRESSED = C2I('b', 't', 'n', 'p')
+	M_BUTTON_PRESSED	= C2I('b', 't', 'n', 'p'),
+	M_BUTTON_RELEASED	= C2I('b', 't', 'n', 'r')
 };
 

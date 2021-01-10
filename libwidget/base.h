@@ -28,6 +28,7 @@ struct Widgetctl
 	Channel *kbdc;		/* chan(Rune)[20] */
 	Channel *mousec;	/* chan(Mouse)[16] */
 	Channel *resizec;
+	/* NOTE user retains ownership of the root widget */
 	Widget *root;
 
 	Keyboardctl *kbd;
@@ -39,6 +40,7 @@ struct Widgetctl
 
 	/* user shouln't care about anything below this point */
 	int pflags;
+	int wthread;
 };
 
 enum /* flags */
@@ -67,8 +69,10 @@ void wdefaults(Widget*);
 int nextid(void);
 
 Point redrawwidget(Widget*, Image*, Rectangle);
+void redrawwctl(Widgetctl*);
 
 int kbdevent(Widget*, Image*, Rectangle, Rune, Channel* /*(Widgetmsg*)*/);
 int mouseevent(Widget*, Image*, Rectangle, Mouse, Channel* /*(Widgetmsg*)*/);
 
 void freewidget(Widget*);
+

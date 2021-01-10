@@ -1,3 +1,4 @@
+/*** Textbox ***/
 
 typedef struct Textbox Textbox;
 
@@ -15,3 +16,4 @@ struct Textbox
 int istextbox(Widget*);
 
 Textbox* newtextbox(int selectable, int editable, Font*, char *content);
+

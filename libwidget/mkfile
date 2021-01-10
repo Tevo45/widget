@@ -15,7 +15,8 @@ HCOMP=\
 	button.h
 
 HFILES=\
-	/sys/include/$HDR
+	/sys/include/$HDR	\
+	w-internal.h
 
 </sys/src/cmd/mksyslib
 

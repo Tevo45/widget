@@ -60,11 +60,8 @@ btnmouse(Widget *w, Image *dst, Rectangle rect, Mouse m, Channel *chan)
 	btn = (Button*)w;
 	if((pressed = m.buttons & 1) != btn->pressed)
 	{
-		if(pressed)
-		{
-			msg = newmsg(btn, M_BUTTON_PRESSED);
-			send(chan, &msg);
-		}
+		msg = newmsg(btn, pressed ? M_BUTTON_PRESSED : M_BUTTON_RELEASED);
+		send(chan, &msg);
 		btn->pressed = pressed;
 		btnredraw(btn, dst, rect);
 		return 1;
@@ -97,7 +94,7 @@ newbutton(Widget *w)
 	if(darkblue == nil)
 		darkblue = allocimagemix(display, DPurpleblue, DPalebluegreen);
 
-	btn = emalloc(sizeof(*btn));
+	btn = emallocz(sizeof(*btn), 1);
 	wdefaults(btn);
 	btn->bg			= lightblue;
 	btn->fg			= darkblue;

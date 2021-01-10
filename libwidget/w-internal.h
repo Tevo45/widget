@@ -10,6 +10,18 @@ emalloc(ulong sz)
 	return p;
 }
 
+static void*
+emallocz(ulong sz, int clr)
+{
+	void *p;
+
+	p = mallocz(sz, clr);
+	if(p == nil)
+		werror("mallocz: %r");
+	setmalloctag(p, getcallerpc(&sz));
+	return p;
+}
+
 /* Widgetctl->flags */
 enum
 {
