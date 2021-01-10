@@ -158,7 +158,8 @@ mouseevent(Widget *w, Image *img, Rectangle rect, Mouse m, Channel *c)
 void
 freewidget(Widget *w)
 {
-	w->cleanup(w);
+	if(w != nil)	/* freeing nil widgets should be a no-op */
+		w->cleanup(w);
 }
 
 void

@@ -5,13 +5,15 @@ LIB=/$objtype/lib/libwidget.a
 OFILES=\
 	base.$O		\
 	textbox.$O	\
-	button.$O
+	button.$O	\
+	box.$O
 
 HDR=widget.h
 
 HCOMP=\
 	base.h		\
 	textbox.h	\
+	box.h		\
 	button.h
 
 HFILES=\

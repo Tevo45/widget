@@ -18,33 +18,26 @@ isbutton(Widget *w)
 	return strcmp(w->kind, btnkind) == 0;
 }
 
+static Button*
+coerce(Widget *w)
+{
+	if(!isbutton(w))
+		werror("coerce: not a button");
+
+	return (Button*)w;
+}
+
 Point
 btnredraw(Widget *w, Image *dst, Rectangle r)
 {
-	Image *tmp;
 	Button *btn;
-	Point btsz, pos, sz;
-	Rectangle conrect;
 
-	if(!isbutton(w))
-		werror("btnredraw: not a button");
+	btn = coerce(w);
 
-	btn = (Button*)w;
-	tmp = allocimage(dst->display, r, RGBA32, 0, DTransparent);
-	sz  = redrawwidget(btn->content, tmp, r);
+	btn->box->content = btn->content;
+	btn->box->bg = btn->pressed ? btn->fg : btn->bg;
 
-	pos = btsz = subpt(r.max, r.min);
-	pos = divpt(pos, 2);
-	pos = subpt(pos, divpt(sz, 2));
-
-	conrect = Rpt(pos, subpt(r.max, pos));
-
-	draw(dst, r, btn->pressed ? btn->fg : btn->bg, nil, ZP);
-	draw(dst, conrect, tmp, nil, ZP);
-
-	freeimage(tmp);
-
-	return btsz;
+	return redrawwidget(btn->box, dst, r);
 }
 
 int
@@ -54,10 +47,7 @@ btnmouse(Widget *w, Image *dst, Rectangle rect, Mouse m, Channel *chan)
 	int pressed;
 	Widgetmsg *msg;
 
-	if(!isbutton(w))
-		werror("btndraw: not a button");
-
-	btn = (Button*)w;
+	btn = coerce(w);
 	if((pressed = m.buttons & 1) != btn->pressed)
 	{
 		msg = newmsg(btn, pressed ? M_BUTTON_PRESSED : M_BUTTON_RELEASED);
@@ -75,11 +65,10 @@ btnfree(Widget *w)
 {
 	Button *btn;
 
-	if(!isbutton(w))
-		werror("btnfree: not a button");
-
-	btn = (Button*)w;
+	btn = coerce(w);
+	btn->box->content = nil;	/* to avoid double-free */
 	freewidget(btn->content);
+	freewidget(btn->box);
 	free(btn);
 }
 
@@ -98,6 +87,7 @@ newbutton(Widget *w)
 	wdefaults(btn);
 	btn->bg			= lightblue;
 	btn->fg			= darkblue;
+	btn->box		= newcenterbox(w);
 	btn->kind		= btnkind;
 	btn->redraw		= btnredraw;
 	btn->cleanup	= btnfree;

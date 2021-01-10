@@ -8,6 +8,9 @@ struct Button
 
 	Widget *content;
 	int pressed;
+
+	/* don't touch */
+	Box *box;
 };
 
 int isbutton(Widget*);
