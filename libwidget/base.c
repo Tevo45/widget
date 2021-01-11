@@ -19,6 +19,22 @@ nextid(void)
 }
 
 void
+handlemenu(Widgetctl *ctl, Menu *menu, int button)
+{
+	Menumsg msg =
+	{
+		.menu	= menu,
+		.button	= button,
+	};
+
+	msg.hit = menuhit(button, ctl->mouse, menu, ctl->image->screen);
+
+	redrawwctl(ctl);
+
+	send(ctl->menuc, &msg);
+}
+
+void
 widgetmain(Widgetctl *ctl)
 {
 	Mouse mouse;
@@ -47,9 +63,29 @@ widgetmain(Widgetctl *ctl)
 		switch(alt(chans))
 		{
 		case MOUSE:
-			if(!mouseevent(ctl->root, ctl->image, ctl->image->r, mouse, ctl->c) 
-				&& ctl->flags & FORWARD_MOUSE)
-				send(ctl->mousec, &mouse);
+			if(!mouseevent(ctl->root, ctl->image, ctl->image->r, mouse, ctl->c))
+			{
+				if((mouse.buttons & M_LEFT) && ctl->left != nil)
+				{
+					handlemenu(ctl, ctl->left, M_LEFT);
+					break;
+				}
+
+				if((mouse.buttons & M_MIDDLE) && ctl->middle != nil)
+				{
+					handlemenu(ctl, ctl->middle, M_MIDDLE);
+					break;
+				}
+
+				if((mouse.buttons & M_RIGHT) && ctl->right != nil)
+				{
+					handlemenu(ctl, ctl->right, M_RIGHT);
+					break;
+				}
+
+				if(ctl->flags & FORWARD_MOUSE)
+					send(ctl->mousec, &mouse);
+			}
 			break;
 		case KEYBOARD:
 			if(!kbdevent(ctl->root, ctl->image, ctl->image->r, rune, ctl->c)
@@ -94,6 +130,7 @@ initwidget(Image *img, Keyboardctl *kbd, Mousectl *mouse, Widget *root, int flag
 	ctl->kbd = kbd;
 	ctl->c = chancreate(sizeof(Widgetmsg*), 16);
 	ctl->kbdc = chancreate(sizeof(Rune), 20);
+	ctl->menuc = chancreate(sizeof(Menumsg), 16);
 	ctl->mousec = chancreate(sizeof(Mouse), 16);
 	ctl->resizec = mouse->resizec;
 	ctl->flags = flags;
@@ -111,6 +148,7 @@ closewidget(Widgetctl *ctl)
 {
 	chanclose(ctl->c);
 	chanclose(ctl->kbdc);
+	chanclose(ctl->menuc);
 	chanclose(ctl->mousec);
 	chanclose(ctl->resizec);
 

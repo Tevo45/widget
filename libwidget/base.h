@@ -4,6 +4,8 @@ typedef struct Widget Widget;
 typedef struct Widgetctl Widgetctl;
 typedef struct Widgetmsg Widgetmsg;
 
+typedef struct Menumsg Menumsg;
+
 struct Widget
 {
 	int id;
@@ -24,9 +26,10 @@ struct Widget
 
 struct Widgetctl
 {
-	Channel *c;			/* chan(Widgetmsg*)[16] */
-	Channel *kbdc;		/* chan(Rune)[20] */
-	Channel *mousec;	/* chan(Mouse)[16] */
+	Channel *c;			/* chan(Widgetmsg*)[16]	*/
+	Channel *kbdc;		/* chan(Rune)[20]		*/
+	Channel *menuc;		/* chan(Menumsg)[16]	*/
+	Channel *mousec;	/* chan(Mouse)[16]		*/
 	Channel *resizec;
 	/* NOTE user retains ownership of the root widget */
 	Widget *root;
@@ -58,6 +61,12 @@ enum /* mouse buttons */
 	M_MIDDLE	= 1<<1,
 	M_RIGHT		= 1<<2
 	/* TODO add scroll up/down */
+};
+
+struct Menumsg
+{
+	Menu *menu;
+	int button, hit;
 };
 
 struct Widgetmsg

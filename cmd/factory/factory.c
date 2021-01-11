@@ -19,6 +19,7 @@ threadmain(int argc, char **argv)
 {
 	Widgetctl *wctl;
 	Widgetmsg *msg;
+	Menumsg mmsg;
 	Box *root;
 	Rune rune;
 
@@ -30,8 +31,25 @@ threadmain(int argc, char **argv)
 	if(initdraw(nil, nil, "widget factory") < 0)
 		sysfatal("initdraw: %r");
 
-	root = newbox(
-		newtextbutton(nil, "hello, world!"), 0
+	enum
+	{
+		MIDDLE_EXIT
+	};
+
+	char *mentries[] =
+	{
+		[MIDDLE_EXIT] = "exit",
+		nil,
+	};
+
+	Menu middle =
+	{
+		.item		= mentries,
+		.lasthit	= -1
+	};
+
+	root = newcenterbox(
+		newtextbutton(nil, "hello, world!")
 	);
 
 	root->maxsize = Pt(256, 128);
@@ -39,9 +57,11 @@ threadmain(int argc, char **argv)
 	if((wctl = initwidget(screen, nil, nil, root, FORWARD_KBD)) == nil)
 		sysfatal("initwidget: %r");
 
+	wctl->middle = &middle;
+
 	enum
 	{
-		MESSAGE, RESIZE, KEYBOARD
+		MESSAGE, RESIZE, KEYBOARD, MENU
 	};
 
 	Alt chans[] = 
@@ -49,6 +69,7 @@ threadmain(int argc, char **argv)
 		{ wctl->c,			&msg,	CHANRCV },
 		{ wctl->resizec,	nil,	CHANRCV },
 		{ wctl->kbdc,		&rune,	CHANRCV },
+		{ wctl->menuc,		&mmsg,	CHANRCV },
 
 		{ nil,				nil,	CHANEND }
 	};
@@ -71,6 +92,18 @@ threadmain(int argc, char **argv)
 		case KEYBOARD:
 			if(rune == '')
 				goto end;
+			break;
+		case MENU:
+			switch(mmsg.button)
+			{
+			case M_MIDDLE:
+				switch(mmsg.hit)
+				{
+				case MIDDLE_EXIT:
+					goto end;
+				}
+				break;
+			}
 			break;
 		case RESIZE:
 			if(getwindow(display, Refnone) < 0)
