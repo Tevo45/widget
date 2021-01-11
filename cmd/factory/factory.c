@@ -19,7 +19,7 @@ threadmain(int argc, char **argv)
 {
 	Widgetctl *wctl;
 	Widgetmsg *msg;
-	Button *root;
+	Box *root;
 	Rune rune;
 
 	ARGBEGIN {
@@ -30,7 +30,11 @@ threadmain(int argc, char **argv)
 	if(initdraw(nil, nil, "widget factory") < 0)
 		sysfatal("initdraw: %r");
 
-	root = newtextbutton(nil, "hello, world!");
+	root = newbox(
+		newtextbutton(nil, "hello, world!"), 0
+	);
+
+	root->maxsize = Pt(256, 128);
 
 	if((wctl = initwidget(screen, nil, nil, root, FORWARD_KBD)) == nil)
 		sysfatal("initwidget: %r");
@@ -56,10 +60,10 @@ threadmain(int argc, char **argv)
 			switch(msg->what)
 			{
 			case M_BUTTON_PRESSED:
-				print("button %d was pressed!\n", msg->sender->id);
+			//	print("button %d was pressed!\n", msg->sender->id);
 				break;
 			case M_BUTTON_RELEASED:
-				print("button %d was released!\n", msg->sender->id);
+			//	print("button %d was released!\n", msg->sender->id);
 				break;
 			}
 			free(msg);

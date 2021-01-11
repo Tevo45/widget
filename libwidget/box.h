@@ -9,9 +9,11 @@ struct Box
 	Widget *content;
 	int flags;
 
+	Point maxsize;
+
 	/* don't touch */
-	Rectangle conrect;
 	int focused;
+	Rectangle bounds;
 };
 
 enum /* flags */

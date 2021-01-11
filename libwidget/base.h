@@ -34,6 +34,9 @@ struct Widgetctl
 	Keyboardctl *kbd;
 	Mousectl *mouse;
 
+	/* if non-nil, shown when widgets don't handle the respective mouse events */
+	Menu *left, *middle, *right;
+
 	Image *image;
 
 	int flags;
@@ -47,6 +50,14 @@ enum /* flags */
 {
 	FORWARD_KBD		= 1<<0,
 	FORWARD_MOUSE	= 1<<1
+};
+
+enum /* mouse buttons */
+{
+	M_LEFT		= 1<<0,
+	M_MIDDLE	= 1<<1,
+	M_RIGHT		= 1<<2
+	/* TODO add scroll up/down */
 };
 
 struct Widgetmsg
