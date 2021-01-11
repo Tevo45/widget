@@ -18,7 +18,7 @@ int isbutton(Widget*);
 Button* newbutton(Widget*);
 Button* newtextbutton(Font*, char *content);
 
-enum
+enum	/* messages */
 {
 	M_BUTTON_PRESSED	= C2I('b', 't', 'n', 'p'),
 	M_BUTTON_RELEASED	= C2I('b', 't', 'n', 'r')

@@ -75,24 +75,21 @@ struct Widgetmsg
 	u32int what;
 };
 
+Widgetctl* initwidget(Image*, Keyboardctl*, Mousectl*, Widget *root, int flags);
+void redrawwctl(Widgetctl*);
+void closewidget(Widgetctl*);
+
+Point redrawwidget(Widget*, Image*, Rectangle);
+void freewidget(Widget*);
+
+int kbdevent(Widget*, Image*, Rectangle, Rune, Channel* /*(Widgetmsg*)*/);
+int mouseevent(Widget*, Image*, Rectangle, Mouse, Channel* /*(Widgetmsg*)*/);
+
+void wdefaults(Widget*);
+int nextid(void);
 Widgetmsg* newmsg(Widget*, u32int what);
 
 #define C2I(a, b, c, d) ((a) << 24 | (b) << 16 | (c) << 8 | (d))
 
 extern void (*werror)(char*, ...);
-
-Widgetctl* initwidget(Image*, Keyboardctl*, Mousectl*, Widget *root, int flags);
-void closewidget(Widgetctl*);
-
-void wdefaults(Widget*);
-
-int nextid(void);
-
-Point redrawwidget(Widget*, Image*, Rectangle);
-void redrawwctl(Widgetctl*);
-
-int kbdevent(Widget*, Image*, Rectangle, Rune, Channel* /*(Widgetmsg*)*/);
-int mouseevent(Widget*, Image*, Rectangle, Mouse, Channel* /*(Widgetmsg*)*/);
-
-void freewidget(Widget*);
 

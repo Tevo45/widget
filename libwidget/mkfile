@@ -20,7 +20,16 @@ HFILES=\
 	/sys/include/$HDR	\
 	w-internal.h
 
+MANPAGES=\
+	/sys/man/2/widget
+
 </sys/src/cmd/mksyslib
+
+install:V: $MANPAGES
 
 /sys/include/$HDR: $HCOMP
 	cat $prereq >$target
+
+# TODO generalize
+/sys/man/2/widget: widget.2.man
+	cp $prereq $target

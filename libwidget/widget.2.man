@@ -1,0 +1,166 @@
+.TH WIDGET 2
+.SH NAME
+initwidget, closewidget, freewidget, redrawwidget, redrawwctl, kbdevent, mouseevent, wdefaults, nextid, newmsg, istextbox, newtextbox, isbox, newbox, newcenterbox, isbutton, newbutton, newtextbutton \- interface widgets
+.SH SYNOPSIS
+.de PB
+.PP
+.ft L
+.nf
+..
+.PB
+#include <u.h>
+#include <libc.h>
+#include <draw.h>
+#include <thread.h>
+#include <mouse.h>
+#include <keyboard.h>
+#include <String.h>
+#include <widget.h>
+.PB
+typedef struct Widget Widget;
+struct Widget
+{
+	int id;
+	char *kind;
+
+	void *aux;
+	Image *bg, *fg;
+
+	Point (*redraw)(Widget*, Image*, Rectangle);
+
+	int (*kbdevent)(Widget*, Image*, Rectangle, Rune, Channel* /*(Widgetmsg*)*/);
+	int (*mouseevent)(Widget*, Image*, Rectangle, Mouse, Channel* /*(Widgetmsg*)*/);
+
+	void (*cleanup)(Widget*);
+};
+.PB
+typedef struct Widgetctl Widgetctl;
+struct Widgetctl
+{
+	Channel *c;			/* chan(Widgetmsg*)[16]	*/
+	Channel *kbdc;		/* chan(Rune)[20]		*/
+	Channel *menuc;		/* chan(Menumsg)[16]	*/
+	Channel *mousec;	/* chan(Mouse)[16]		*/
+	Channel *resizec;
+	Widget *root;
+
+	Keyboardctl *kbd;
+	Mousectl *mouse;
+
+	Menu *left, *middle, *right;
+
+	Image *image;
+
+	int flags;
+	...
+};
+.PB
+enum /* flags */
+{
+	FORWARD_KBD		= 1<<0,
+	FORWARD_MOUSE	= 1<<1
+};
+.PB
+enum /* mouse buttons */
+{
+	M_LEFT		= 1<<0,
+	M_MIDDLE	= 1<<1,
+	M_RIGHT		= 1<<2
+};
+.PB
+typedef struct Menumsg Menumsg;
+struct Menumsg
+{
+	Menu *menu;
+	int button, hit;
+};
+.PB
+typedef struct Widgetmsg Widgetmsg;
+struct Widgetmsg
+{
+	Widget *sender;
+	u32int what;
+};
+.PB
+Widgetctl* initwidget(Image*, Keyboardctl*, Mousectl*, Widget *root, int flags);
+void redrawwctl(Widgetctl*);
+void closewidget(Widgetctl*);
+.PB
+Point redrawwidget(Widget*, Image*, Rectangle);
+void freewidget(Widget*);
+.PB
+int kbdevent(Widget*, Image*, Rectangle, Rune, Channel* /*(Widgetmsg*)*/);
+int mouseevent(Widget*, Image*, Rectangle, Mouse, Channel* /*(Widgetmsg*)*/);
+.PB
+void wdefaults(Widget*);
+int nextid(void);
+Widgetmsg* newmsg(Widget*, u32int what);
+.PB
+#define C2I(a, b, c, d) ((a) << 24 | (b) << 16 | (c) << 8 | (d))
+.PB
+extern void (*werror)(char*, ...) = sysfatal;
+.PB
+typedef struct Textbox Textbox;
+struct Textbox
+{
+	Widget;
+
+	Font *font;
+	String *content;
+	Point lastpt;
+	int selectable;
+	int editable;
+};
+.PB
+int istextbox(Widget*);
+.PB
+Textbox* newtextbox(int selectable, int editable, Font*, char *content);
+.PB
+typedef struct Box Box;
+struct Box
+{
+	Widget;
+
+	Widget *content;
+	int flags;
+
+	Point maxsize;
+	...
+};
+.PB
+enum /* flags */
+{
+	B_CENTER_CONTENT	= 1<<0
+};
+.PB
+int isbox(Widget*);
+.PB
+Box* newbox(Widget*, int flags);
+Box* newcenterbox(Widget*);
+.PB
+typedef struct Button Button;
+struct Button
+{
+	Widget;
+
+	Widget *content;
+	int pressed;
+	...
+};
+.PB
+int isbutton(Widget*);
+.PB
+Button* newbutton(Widget*);
+Button* newtextbutton(Font*, char *content);
+.PB
+enum	/* messages */
+{
+	M_BUTTON_PRESSED
+	M_BUTTON_RELEASED
+};
+.SH DESCRIPTION
+<we describe libwidget here>
+.SH DIAGNOSTICS
+These routines call the function pointed to by werror on fatal errors. The function should not return.
+.SH BUGS
+Writing widgets involves too much boilerplate code.

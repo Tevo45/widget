@@ -63,6 +63,12 @@ widgetmain(Widgetctl *ctl)
 		switch(alt(chans))
 		{
 		case MOUSE:
+			/* 
+			 * FIXME if the user clicks once, the widget handles it, then
+			 * the user drags and the widget claims to not have handled it
+			 * a menu will be shown for that button (if there's one), but 
+			 * it probably shouldn't
+			 */
 			if(!mouseevent(ctl->root, ctl->image, ctl->image->r, mouse, ctl->c))
 			{
 				if((mouse.buttons & M_LEFT) && ctl->left != nil)
